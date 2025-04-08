@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaintMaster | Home Maintenance Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        :root {
+            --primary: #2e7d32;
+            --primary-dark: #1b5e20;
+            --primary-light: #4caf50;
+            --secondary: #1565c0;
+            --danger: #d32f2f;
+            --warning: #f57c00;
+            --grey-light: #f5f8fa;
+            --grey: #dadce0;
+            --text: #3c4043;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background-color: #f0f4f8;
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            max-width: 1100px;
+            margin: 20px auto;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: white;
+            flex: 1;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        
+        .chat-title i {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .chat-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .chat-title span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .chat-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            scroll-behavior: smooth;
+        }
+        
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .messages-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 14px;
+            max-width: 75%;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.bot {
+            align-self: flex-start;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .bot .avatar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+        
+        .user .avatar {
+            background: linear-gradient(135deg, var(--secondary), #0d47a1);
+        }
+        
+        .message-content {
+            background-color: #f6f8fc;
+            padding: 14px 18px;
+            border-radius: 18px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            line-height: 1.6;
+            font-size: 15px;
+            position: relative;
+        }
+        
+        .bot .message-content {
+            border-top-left-radius: 4px;
+        }
+        
+        .user .message-content {
+            background: linear-gradient(135deg, var(--secondary), #1976d2);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #9aa0a6;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .message-time i {
+            font-size: 10px;
+        }
+        
+        .user .message-time {
+            color: rgba(255,255,255,0.7);
+            justify-content: flex-end;
+        }
+        
+        .suggestions {
+            padding: 18px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-top: 1px solid var(--grey);
+            background-color: #f9fbfd;
+        }
+        
+        .suggestion-chip {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .suggestion-chip:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+        }
+        
+        .input-area {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-top: 1px solid var(--grey);
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 5;
+        }
+        
+        .input-btn {
+            background: #f0f4f8;
+            border: 1px solid #e0e0e0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .input-btn:hover {
+            background-color: #e8f0fb;
+            color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        #send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+        }
+        
+        #send-btn:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            background-color: #f9fafc;
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        }
+        
+        .tasks-bar {
+            background: linear-gradient(to right, #f9fbfd, #f0f6ff);
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            border-top: 1px solid var(--grey);
+            scrollbar-width: thin;
+            position: relative;
+        }
+        
+        .tasks-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 60px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, #f0f6ff);
+            pointer-events: none;
+        }
+        
+        .task-item {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        
+        .task-item:hover {
+            border-color: var(--primary);
+            background-color: #f0f9f0;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .priority-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .priority-badge::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            opacity: 0.3;
+        }
+        
+        .priority-high {
+            background-color: var(--danger);
+        }
+        
+        .priority-high::after {
+            border-color: var(--danger);
+        }
+        
+        .priority-medium {
+            background-color: var(--warning);
+        }
+        
+        .priority-medium::after {
+            border-color: var(--warning);
+        }
+        
+        .priority-low {
+            background-color: var(--primary-light);
+        }
+        
+        .priority-low::after {
+            border-color: var(--primary-light);
+        }
+        
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            animation: fadeInWelcome 0.8s ease;
+        }
+        
+        @keyframes fadeInWelcome {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-message h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+        
+        .welcome-message p {
+            font-size: 16px;
+            max-width: 600px;
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .welcome-icon {
+            font-size: 42px;
+            color: white;
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(46, 125, 50, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-icon::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+            color: white;
+        }
+        
+        .status-online {
+            background-color: var(--primary-light);
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .welcome-message h2 {
+                font-size: 24px;
+            }
+            
+            .welcome-icon {
+                width: 90px;
+                height: 90px;
+                font-size: 36px;
+            }
+            
+            .input-area {
+                padding: 14px 16px;
+            }
+            
+            .suggestions {
+                padding: 14px 16px;
+            }
+        }
+        /* Add these styles to the existing <style> section */
+.section-heading {
+    display: block;
+    font-size: 16px;
+    color: var(--primary-dark);
+    margin-top: 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--grey);
+    padding-bottom: 3px;
+}
+
+.problem-heading {
+    display: inline-block;
+    font-weight: 600;
+    margin-right: 6px;
+    color: var(--danger);
+}
+
+.solution-heading {
+    display: inline-block;
+    font-weight: 600;
+    margin-right: 6px;
+    color: var(--primary);
+}
+
+.message-content {
+    line-height: 1.7;
+}
+
+.message-content br {
+    content: "";
+    margin: 6px 0;
+    display: block;
+}
+
+.message-content ul {
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.message-content li {
+    margin-bottom: 4px;
+}
+
+.message-content strong {
+    color: var(--primary-dark);
+}
+
+.message-content em {
+    font-style: italic;
+    color: var(--secondary);
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: var(--primary-light);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+    </style>
+
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-tools"></i>
+                <h1>MaintMaster<span class="status-badge status-online">ONLINE</span></h1>
+            </div>
+            <div class="chat-controls">
+                <button class="control-btn" title="Task Calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+                <button class="control-btn" title="Maintenance History">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button class="control-btn" title="Account Settings">
+                    <i class="fas fa-user-cog"></i>
+                </button>
+                <button class="control-btn" title="Help Center">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-body">
+            <div class="messages-container">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <h2>Welcome to MaintMaster</h2>
+                    <p>Your intelligent home maintenance assistant. I can help you track maintenance schedules, provide seasonal upkeep recommendations, troubleshoot common household issues, and offer expert maintenance advice.</p>
+                </div>
+                
+                <div class="message bot">
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">
+                            Hello! I'm MaintMaster, your personal home maintenance expert. How can I help you maintain your home today?
+                        </div>
+                        <div class="message-time">
+                            <i class="fas fa-check-double"></i> Just now
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tasks-bar">
+                <div class="task-item">
+                    <span class="priority-badge priority-high"></span>
+                    <span>HVAC Filter Replacement</span>
+                </div>
+                <div class="task-item">
+                    <span class="priority-badge priority-medium"></span>
+                    <span>Seasonal Gutter Cleaning</span>
+                </div>
+                <div class="task-item">
+                    <span class="priority-badge priority-low"></span>
+                    <span>Smoke Detector Testing</span>
+                </div>
+                <div class="task-item">
+                    <span class="priority-badge priority-medium"></span>
+                    <span>Water Heater Maintenance</span>
+                </div>
+                <div class="task-item">
+                    <span class="priority-badge priority-low"></span>
+                    <span>Spring Lawn Care</span>
+                </div>
+                <div class="task-item">
+                    <span class="priority-badge priority-high"></span>
+                    <span>Roof Inspection</span>
+                </div>
+            </div>
+            
+            <div class="suggestions">
+                <button class="suggestion-chip">HVAC troubleshooting</button>
+                <button class="suggestion-chip">Fix leaky faucet</button>
+                <button class="suggestion-chip">Spring maintenance checklist</button>
+                <button class="suggestion-chip">Home energy efficiency tips</button>
+                <button class="suggestion-chip">Schedule maintenance reminder</button>
+                <button class="suggestion-chip">Winterization guide</button>
+            </div>
+            
+            <div class="input-area">
+                <button class="input-btn" title="Voice Input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <input type="text" class="input-field" placeholder="Ask MaintMaster about home maintenance...">
+                <button class="input-btn" title="Attach Photo">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button class="input-btn" id="send-btn" title="Send Message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    const inputField = document.querySelector('.input-field');
+    const sendButton = document.getElementById('send-btn');
+    const messagesContainer = document.querySelector('.messages-container');
+    const suggestionChips = document.querySelectorAll('.suggestion-chip');
+    const taskItems = document.querySelectorAll('.task-item');
+    
+    // API configuration
+    // You'll need to replace this with your actual API key
+    const GEMINI_API_KEY = 'AIzaSyCtg11CQhVGsBUOe3_ot2KGXsD_YS8f8SQ'; 
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    
+    // System prompt to define bot persona and knowledge domain
+    const SYSTEM_PROMPT = `You are MaintMaster, an expert home maintenance assistant chatbot. 
+    You provide professional advice on home maintenance tasks, seasonal upkeep, troubleshooting common issues, 
+    and scheduling maintenance. Your responses should be knowledgeable, practical, and actionable.
+    Always provide specific recommendations and next steps. Keep responses concise but informative, 
+    and end with a helpful suggestion or question to continue the conversation.`;
+    
+    // Function to call API
+    async function callMaintMasterAPI(userMessage) {
+        try {
+            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                { text: SYSTEM_PROMPT },
+                                { text: userMessage }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 250,
+                        topP: 0.8,
+                        topK: 40
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                console.error('Unexpected API response structure:', data);
+                return "I'm having trouble connecting to my maintenance database right now. Could you rephrase your question or try again in a moment?";
+            }
+        } catch (error) {
+            console.error('Error calling API:', error);
+            return "I apologize, but I'm experiencing a technical issue. Please try again shortly while I resolve this maintenance hiccup.";
+        }
+    }
+    
+    // Enhanced fallback responses with more specific maintenance advice
+    const fallbackResponses = {
+        'hvac': "For HVAC maintenance, I recommend changing filters every 1-3 months, checking thermostat settings, and scheduling professional servicing twice yearly. What specific HVAC issue are you dealing with?",
+        'leak': "To fix a leaky faucet, first shut off the water supply, disassemble the handle, replace worn washers or O-rings, and reassemble. Could you describe where exactly the leak is occurring?",
+        'seasonal': "Your seasonal maintenance should include gutter cleaning, HVAC checks, and weatherstripping inspection. Which season are you preparing for specifically?",
+        'roof': "Roof maintenance includes checking for damaged shingles, cleaning gutters, and inspecting flashing around chimneys and vents. Have you noticed any specific issues with your roof?",
+        'plumbing': "For plumbing maintenance, check for leaks, insulate pipes in cold areas, and flush water heaters annually. What part of your plumbing system needs attention?",
+        'lawn': "Lawn care varies by season but generally includes regular mowing, fertilizing, aerating, and proper watering schedules. What specific lawn issue are you facing?",
+        'default': "I'd be happy to help with your home maintenance question. To provide the most accurate advice, could you share a few more details about what you're working on?"
+    };
+    
+    // Function to get enhanced fallback response based on keywords
+    function getFallbackResponse(userInput) {
+        const input = userInput.toLowerCase();
+        for (const [keyword, response] of Object.entries(fallbackResponses)) {
+            if (input.includes(keyword)) {
+                return response;
+            }
+        }
+        return fallbackResponses.default;
+    }
+    
+    // Format timestamp
+    function getTimeString() {
+        const now = new Date();
+        return now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+    }
+    
+    // Send message function with enhanced animation and timing
+    async function sendMessage(content) {
+        if (!content.trim()) return;
+        
+        // Add user message with animation
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user';
+        userMessage.style.opacity = '0';
+        userMessage.style.transform = 'translateY(10px)';
+        userMessage.innerHTML = `
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <div class="message-content">${content}</div>
+                <div class="message-time">
+                    <i class="fas fa-check"></i> ${getTimeString()}
+                </div>
+            </div>
+        `;
+        messagesContainer.appendChild(userMessage);
+        
+        // Trigger animation after a tiny delay for proper rendering
+        setTimeout(() => {
+            userMessage.style.transition = 'all 0.3s ease';
+            userMessage.style.opacity = '1';
+            userMessage.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Clear input
+        inputField.value = '';
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Show typing indicator with animation
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator. style.opacity = '0';
+        typingIndicator.style.transform = 'translateY(10px)';
+        typingIndicator.innerHTML = `
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <div class="message-content">
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <span>Analyzing</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0s">.</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0.3s">.</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0.6s">.</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        messagesContainer.appendChild(typingIndicator);
+        
+        // Trigger animation after a tiny delay for proper rendering
+        setTimeout(() => {
+            typingIndicator.style.transition = 'all 0.3s ease';
+            typingIndicator.style.opacity = '1';
+            typingIndicator.style.transform = 'translateY(0)';
+            
+            // Add animation for dots
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes pulse {
+                    0% { opacity: 0.3; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.3; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 10);
+        
+        try {
+            // Random delay between 1-2 seconds to simulate thinking time
+            const thinkingTime = Math.floor(Math.random() * 1000) + 1000;
+            await new Promise(resolve => setTimeout(resolve, thinkingTime));
+            
+            // Get response from API
+            const aiResponse = await callMaintMasterAPI(content);
+            
+            // Remove typing indicator with fade out
+            typingIndicator.style.opacity = '0';
+            typingIndicator.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                messagesContainer.removeChild(typingIndicator);
+                
+                // Add bot response with animation
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.style.opacity = '0';
+                botMessage.style.transform = 'translateY(10px)';
+                botMessage.innerHTML = `
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${aiResponse}</div>
+                        <div class="message-time">
+                            <i class="fas fa-check-double"></i> ${getTimeString()}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(botMessage);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    botMessage.style.transition = 'all 0.3s ease';
+                    botMessage.style.opacity = '1';
+                    botMessage.style.transform = 'translateY(0)';
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 10);
+            }, 300);
+            
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            
+            // Remove typing indicator
+            typingIndicator.style.opacity = '0';
+            typingIndicator.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                messagesContainer.removeChild(typingIndicator);
+                
+                // Add fallback response with animation
+                const fallbackResponse = getFallbackResponse(content);
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.style.opacity = '0';
+                botMessage.style.transform = 'translateY(10px)';
+                botMessage.innerHTML = `
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${fallbackResponse}</div>
+                        <div class="message-time">
+                            <i class="fas fa-check-double"></i> ${getTimeString()}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(botMessage);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    botMessage.style.transition = 'all 0.3s ease';
+                    botMessage.style.opacity = '1';
+                    botMessage.style.transform = 'translateY(0)';
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 10);
+            }, 300);
+        }
+    }
+    
+    // Enhanced visual feedback for input field
+    inputField.addEventListener('focus', () => {
+        inputField.style.boxShadow = '0 0 0 3px rgba(46, 125, 50, 0.15)';
+    });
+    
+    inputField.addEventListener('blur', () => {
+        inputField.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.05)';
+    });
+    
+    // Event listeners with visual feedback
+    sendButton.addEventListener('click', () => {
+        sendButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            sendButton.style.transform = 'scale(1)';
+            sendMessage(inputField.value);
+        }, 100);
+    });
+    
+    inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                sendButton.style.transform = 'scale(1)';
+                sendMessage(inputField.value);
+            }, 100);
+        }
+    });
+    
+    suggestionChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                chip.style.transform = 'scale(1)';
+                sendMessage(chip.textContent);
+            }, 100);
+        });
+    });
+    
+    taskItems.forEach(task => {
+        task.addEventListener('click', () => {
+            task.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                task.style.transform = 'scale(1)';
+                sendMessage(`Tell me about ${task.querySelector('span:last-child').textContent}`);
+            }, 100);
+        });
+
+        // Add hover effect for accessibility
+        task.addEventListener('mouseover', () => {
+            task.style.borderColor = 'var(--primary)';
+        });
+        
+        task.addEventListener('mouseout', () => {
+            task.style.borderColor = '#e0e0e0';
+        });
+    });
+    
+    // Add style for animations
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .typing-dot {
+            font-size: 24px;
+            line-height: 10px;
+            font-weight: bold;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Focus input field on load
+    setTimeout(() => {
+        inputField.focus();
+    }, 500);
+});
+    </script> -->
+    <script>
+        function formatResponse(response) {
+    // Replace section headers with proper HTML formatting
+    let formattedText = response;
+    
+    // Replace asterisk-based headers with proper HTML elements
+    formattedText = formattedText.replace(/\*\*(.*?):\*\*/g, '<strong class="section-heading">$1:</strong>');
+    
+    // Replace problem/solution markers
+    formattedText = formattedText.replace(/\*\*Problem:\*\*/g, '<strong class="problem-heading">Problem:</strong>');
+    formattedText = formattedText.replace(/\*\*Solution:\*\*/g, '<strong class="solution-heading">Solution:</strong>');
+    
+    // Format numbered steps
+    formattedText = formattedText.replace(/(\d+\.\s)/g, '<span class="step-number">$1</span>');
+    
+    // Replace markdown-style lists
+    formattedText = formattedText.replace(/- (.*?)(?=\n|$)/g, '• $1<br>');
+    
+    // Format bold and italic text
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Add paragraph breaks for readability
+    formattedText = formattedText.replace(/\.\s+(?=[A-Z])/g, '.<br><br>');
+    
+    return formattedText;
+}
+        document.addEventListener('DOMContentLoaded', function() {
+    const inputField = document.querySelector('.input-field');
+    const sendButton = document.getElementById('send-btn');
+    const messagesContainer = document.querySelector('.messages-container');
+    const suggestionChips = document.querySelectorAll('.suggestion-chip');
+    const taskItems = document.querySelectorAll('.task-item');
+    
+    // API configuration
+    // You'll need to replace this with your actual API key
+    const GEMINI_API_KEY = ''; // Replaced with placeholder for security
+    // const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    
+    // System prompt to define bot persona and knowledge domain
+    const SYSTEM_PROMPT = `You are MaintMaster, an expert home maintenance assistant chatbot. 
+    You provide professional advice on home maintenance tasks, seasonal upkeep, troubleshooting common issues, 
+    and scheduling maintenance. Your responses should be knowledgeable, practical, and actionable.
+    Always provide specific recommendations and next steps. Keep responses concise but informative, 
+    and end with a helpful suggestion or question to continue the conversation.`;
+    
+    // Function to call API
+    async function callMaintMasterAPI(userMessage) {
+        try {
+            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                { text: SYSTEM_PROMPT },
+                                { text: userMessage }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 250,
+                        topP: 0.8,
+                        topK: 40
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                console.error('Unexpected API response structure:', data);
+                return "I'm having trouble connecting to my maintenance database right now. Could you rephrase your question or try again in a moment?";
+            }
+        } catch (error) {
+            console.error('Error calling API:', error);
+            return "I apologize, but I'm experiencing a technical issue. Please try again shortly while I resolve this maintenance hiccup.";
+        }
+    }
+    
+    // Enhanced fallback responses with more specific maintenance advice
+    const fallbackResponses = {
+        'hvac': "For HVAC maintenance, I recommend changing filters every 1-3 months, checking thermostat settings, and scheduling professional servicing twice yearly. What specific HVAC issue are you dealing with?",
+        'leak': "To fix a leaky faucet, first shut off the water supply, disassemble the handle, replace worn washers or O-rings, and reassemble. Could you describe where exactly the leak is occurring?",
+        'seasonal': "Your seasonal maintenance should include gutter cleaning, HVAC checks, and weatherstripping inspection. Which season are you preparing for specifically?",
+        'roof': "Roof maintenance includes checking for damaged shingles, cleaning gutters, and inspecting flashing around chimneys and vents. Have you noticed any specific issues with your roof?",
+        'plumbing': "For plumbing maintenance, check for leaks, insulate pipes in cold areas, and flush water heaters annually. What part of your plumbing system needs attention?",
+        'lawn': "Lawn care varies by season but generally includes regular mowing, fertilizing, aerating, and proper watering schedules. What specific lawn issue are you facing?",
+        'default': "I'd be happy to help with your home maintenance question. To provide the most accurate advice, could you share a few more details about what you're working on?"
+    };
+    
+    // Function to get enhanced fallback response based on keywords
+    function getFallbackResponse(userInput) {
+        const input = userInput.toLowerCase();
+        for (const [keyword, response] of Object.entries(fallbackResponses)) {
+            if (input.includes(keyword)) {
+                return response;
+            }
+        }
+        return fallbackResponses.default;
+    }
+
+    function formatResponse(response) {
+    // Replace section headers with proper HTML formatting
+    let formattedText = response;
+    
+    // Replace asterisk-based headers with proper HTML elements
+    formattedText = formattedText.replace(/\*\*(.*?):\*\*/g, '<strong class="section-heading">$1:</strong>');
+    
+    // Replace problem/solution markers
+    formattedText = formattedText.replace(/\*\*Problem:\*\*/g, '<strong class="problem-heading">Problem:</strong>');
+    formattedText = formattedText.replace(/\*\*Solution:\*\*/g, '<strong class="solution-heading">Solution:</strong>');
+    
+    // Remove remaining asterisks with formatting
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Add paragraph breaks for readability
+    formattedText = formattedText.replace(/\.\s+(?=[A-Z])/g, '.<br><br>');
+    
+    return formattedText;
+}
+    
+    // Format timestamp
+    function getTimeString() {
+        const now = new Date();
+        return now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+    }
+    
+    // Send message function with enhanced animation and timing
+    async function sendMessage(content) {
+        if (!content.trim()) return;
+        
+        // Add user message with animation
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user';
+        userMessage.style.opacity = '0';
+        userMessage.style.transform = 'translateY(10px)';
+        userMessage.innerHTML = `
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <div class="message-content">${content}</div>
+                <div class="message-time">
+                    <i class="fas fa-check"></i> ${getTimeString()}
+                </div>
+            </div>
+        `;
+        messagesContainer.appendChild(userMessage);
+        
+        // Trigger animation after a tiny delay for proper rendering
+        setTimeout(() => {
+            userMessage.style.transition = 'all 0.3s ease';
+            userMessage.style.opacity = '1';
+            userMessage.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Clear input
+        inputField.value = '';
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Show typing indicator with animation
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator.style.opacity = '0';  // Fixed missing space
+        typingIndicator.style.transform = 'translateY(10px)';
+        typingIndicator.innerHTML = `
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <div class="message-content">
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        <span>Analyzing</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0s">.</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0.3s">.</span>
+                        <span class="typing-dot" style="animation: pulse 1s infinite 0.6s">.</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        messagesContainer.appendChild(typingIndicator);
+        
+        // Trigger animation after a tiny delay for proper rendering
+        setTimeout(() => {
+            typingIndicator.style.transition = 'all 0.3s ease';
+            typingIndicator.style.opacity = '1';
+            typingIndicator.style.transform = 'translateY(0)';
+            
+            // Add animation for dots
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes pulse {
+                    0% { opacity: 0.3; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.3; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 10);
+        
+        try {
+            // Random delay between 1-2 seconds to simulate thinking time
+            const thinkingTime = Math.floor(Math.random() * 1000) + 1000;
+            await new Promise(resolve => setTimeout(resolve, thinkingTime));
+            
+            // Get response from API
+            const aiResponse = await callMaintMasterAPI(content);
+            
+            // Remove typing indicator with fade out
+            typingIndicator.style.opacity = '0';
+            typingIndicator.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                messagesContainer.removeChild(typingIndicator);
+                
+                // Add bot response with animation
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.style.opacity = '0';
+                botMessage.style.transform = 'translateY(10px)';
+                botMessage.innerHTML = `
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${aiResponse}</div>
+                        <div class="message-time">
+                            <i class="fas fa-check-double"></i> ${getTimeString()}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(botMessage);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    botMessage.style.transition = 'all 0.3s ease';
+                    botMessage.style.opacity = '1';
+                    botMessage.style.transform = 'translateY(0)';
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 10);
+            }, 300);
+            
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            
+            // Remove typing indicator
+            typingIndicator.style.opacity = '0';
+            typingIndicator.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                messagesContainer.removeChild(typingIndicator);
+                
+                // Add fallback response with animation
+                const fallbackResponse = getFallbackResponse(content);
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+                botMessage.style.opacity = '0';
+                botMessage.style.transform = 'translateY(10px)';
+                botMessage.innerHTML = `
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="message-content">${fallbackResponse}</div>
+                        <div class="message-time">
+                            <i class="fas fa-check-double"></i> ${getTimeString()}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(botMessage);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    botMessage.style.transition = 'all 0.3s ease';
+                    botMessage.style.opacity = '1';
+                    botMessage.style.transform = 'translateY(0)';
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 10);
+            }, 300);
+        }
+    }
+    
+    // Enhanced visual feedback for input field
+    inputField.addEventListener('focus', () => {
+        inputField.style.boxShadow = '0 0 0 3px rgba(46, 125, 50, 0.15)';
+    });
+    
+    inputField.addEventListener('blur', () => {
+        inputField.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.05)';
+    });
+    
+    // Event listeners with visual feedback
+    sendButton.addEventListener('click', () => {
+        sendButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            sendButton.style.transform = 'scale(1)';
+            sendMessage(inputField.value);
+        }, 100);
+    });
+    
+    inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                sendButton.style.transform = 'scale(1)';
+                sendMessage(inputField.value);
+            }, 100);
+        }
+    });
+    
+    suggestionChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                chip.style.transform = 'scale(1)';
+                sendMessage(chip.textContent);
+            }, 100);
+        });
+    });
+    
+    taskItems.forEach(task => {
+        task.addEventListener('click', () => {
+            task.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                task.style.transform = 'scale(1)';
+                sendMessage(`Tell me about ${task.querySelector('span:last-child').textContent}`);
+            }, 100);
+        });
+
+        // Add hover effect for accessibility
+        task.addEventListener('mouseover', () => {
+            task.style.borderColor = 'var(--primary)';
+        });
+        
+        task.addEventListener('mouseout', () => {
+            task.style.borderColor = '#e0e0e0';
+        });
+    });
+    
+    // Add style for animations
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .typing-dot {
+            font-size: 24px;
+            line-height: 10px;
+            font-weight: bold;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Focus input field on load
+    setTimeout(() => {
+        inputField.focus();
+    }, 500);
+});
+    </script>
+</body>
+</html>
