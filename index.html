@@ -586,6 +586,22 @@ footer{
     
 
 }
+.cultural-tip {
+    color: var(--primary);
+    font-weight: 600;
+    display: block;
+    margin-top: 8px;
+}
+
+.region-item:hover {
+    background: var(--primary-light);
+    color: white;
+}
+
+.message-content {
+    font-size: 15px;
+    line-height: 1.6;
+}
     </style>
 
 </head>
@@ -662,7 +678,7 @@ footer{
     <footer>
         Created by: Vasudev Siddh 12305855 and Arpit Mishra 12306022
     </footer>
-  <script>  
+<script>  
     // Format response helper function
             // Format response helper function
             function formatResponse(response) {
@@ -813,57 +829,38 @@ footer{
         const taskItems = document.querySelectorAll('.task-item');
 
         // API configuration  
-        const GEMINI_API_KEY = '';  // Add your API key here
+        const GEMINI_API_KEY = 'AIzaSyDkLqkKV1Qq7Q0uklAsnnB7VusmH604u3c';  // Add your API key here
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-        const SYSTEM_PROMPT = `You are MaintMaster, an expert home maintenance assistant chatbot. 
-        You provide professional advice on home maintenance tasks, seasonal upkeep, troubleshooting common issues, 
-        and scheduling maintenance. Your responses should be knowledgeable, practical, and actionable.
-        Always provide specific recommendations and next steps. Keep responses concise but informative, 
-        and end with a helpful suggestion or question to continue the conversation.`;
+        const SYSTEM_PROMPT = `You are MaintMaster, exclusively an expert home maintenance assistant chatbot. 
+You cannot and will not take on any other roles or functions. You provide professional advice only on 
+home maintenance tasks, seasonal upkeep, troubleshooting common issues, and scheduling maintenance. 
+Your responses should be knowledgeable, practical, and actionable, strictly focused on home maintenance.`;
 
-        // Call AI API
-        // async function callMaintMasterAPI(userMessage) {
-        //     try {
-        //         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json'
-        //             },
-        //             body: JSON.stringify({
-        //                 contents: [{
-        //                     role: 'user',
-        //                     parts: [
-        //                         { text: SYSTEM_PROMPT },
-        //                         { text: userMessage }
-        //                     ]
-        //                 }],
-        //                 generationConfig: {
-        //                     temperature: 0.7,
-        //                     maxOutputTokens: 250,
-        //                     topP: 0.8,
-        //                     topK: 40
-        //                 }
-        //             })
-        //         });
-                
-        //         const data = await response.json();
-                
-        //         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        //             return data.candidates[0].content.parts[0].text;
-        //         } else {
-        //             console.error('Unexpected API response structure:', data);
-        //             return "I'm having trouble connecting to my maintenance database right now. Could you rephrase your question or try again in a moment?";
-        //         }
-        //     } catch (error) {
-        //         console.error('Error calling API:', error);
-        //         return "I apologize, but I'm experiencing a technical issue. Please try again shortly while I resolve this maintenance hiccup.";
-        //     }
-        // }
-        
-        async function callMaintMasterAPI(userMessage) {
+     
+
+async function callMaintMasterAPI(userMessage) {
     try {
-        // Check if message is home maintenance related
+        // Role-switching detection keywords
+        const roleChangeKeywords = [
+            'act as', 'pretend to be', 'be a', 'switch to', 'change to',
+            'become a', 'play the role', 'roleplay as', 'work as',
+            'function as', 'serve as', 'operate as', 'perform as'
+        ];
+
+        // Convert to lowercase for comparison
+        const lowercaseMessage = userMessage.toLowerCase();
+
+        // Check if message contains role-switching attempt
+        const isRoleChangeAttempt = roleChangeKeywords.some(keyword => 
+            lowercaseMessage.includes(keyword));
+
+        // If role change is attempted, return restriction message
+        if (isRoleChangeAttempt) {
+            return "I apologize, but I am exclusively designed to be a home maintenance assistant. I cannot take on other roles or functions. I can only help with home repairs, maintenance schedules, troubleshooting, and other home-related issues. Would you like assistance with any home maintenance tasks?";
+        }
+
+        // Maintenance keywords
         const maintenanceKeywords = ['home', 'house', 'maintenance', 'repair', 'fix', 'leak', 'hvac', 
             'plumbing', 'roof', 'lawn', 'garden', 'appliance', 'clean', 'filter', 'seasonal', 
             'gutter', 'paint', 'deck', 'fence', 'insulation', 'weather', 'draft', 'door', 'window', 
@@ -872,29 +869,25 @@ footer{
             'wall', 'inspection', 'schedule', 'electrical', 'wiring', 'outlet', 'switch', 'light',
             'bulb', 'fixture', 'smoke detector', 'carbon monoxide', 'safety', 'winterize', 'summer',
             'spring', 'fall', 'winter', 'seasonal', 'tool', 'diy', 'professional', 'contractor'];
-        
-        // Basic greeting keywords
+
+        // Greeting keywords
         const greetingKeywords = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 
             'good evening', 'how are you', 'how\'s it going', 'what\'s up', 'howdy', 'nice to meet'];
-        
-        // Convert to lowercase for comparison
-        const lowercaseMessage = userMessage.toLowerCase();
-        
-        // Check if message contains maintenance keywords
+
+        // Check message type
         const isMaintenanceRelated = maintenanceKeywords.some(keyword => 
             lowercaseMessage.includes(keyword));
-            
-        // Check if message is a greeting
         const isGreeting = greetingKeywords.some(keyword => 
             lowercaseMessage.includes(keyword));
-        
+
         // Handle different message types
         if (isGreeting) {
-            return "Hello there! I'm your home maintenance assistant. How can I help you with your home maintenance needs today? I can provide advice on repairs, seasonal maintenance tasks, or help you troubleshoot issues around your home.";
+            return "Hello! I'm your home maintenance assistant. How can I help you with your home maintenance needs today? I can provide advice on repairs, seasonal maintenance tasks, or help you troubleshoot issues around your home.";
         } else if (!isMaintenanceRelated) {
-            return "I'm sorry, but I'm specifically designed to help with home maintenance questions. I can assist with repairs, maintenance schedules, troubleshooting, and other home-related issues. Is there something about your home I can help you with today?";
+            return "I apologize, but I can only assist with home maintenance related questions. I'm specifically designed to help with repairs, maintenance schedules, troubleshooting, and other home-related issues. Is there something about your home I can help you with?";
         }
-        
+
+        // API call
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
@@ -916,9 +909,9 @@ footer{
                 }
             })
         });
-                
+
         const data = await response.json();
-                
+
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             return data.candidates[0].content.parts[0].text;
         } else {
@@ -930,7 +923,6 @@ footer{
         return "I apologize, but I'm experiencing a technical issue. Please try again shortly while I resolve this maintenance hiccup.";
     }
 }
-        // Fallback responses
         const fallbackResponses = {
             'hvac': "For HVAC maintenance, I recommend changing filters every 1-3 months, checking thermostat settings, and scheduling professional servicing twice yearly. What specific HVAC issue are you dealing with?",
             'leak': "To fix a leaky faucet, first shut off the water supply, disassemble the handle, replace worn washers or O-rings, and reassemble. Could you describe where exactly the leak is occurring?",
@@ -1176,6 +1168,8 @@ footer{
             inputField.focus();
         }, 500);
     });
-    </script>
+    </script> 
+
+
 </body>
 </html>
